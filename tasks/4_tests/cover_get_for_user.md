@@ -1,13 +1,7 @@
-# Cover The `GetGoalsForUser` Route
-- [ ] Arrange and Act using `Get` as a model
-- [ ] Assert that:
-    - [ ] `result` is not null
-- [ ] For each `goal` in `result`, assert that:
-    - [ ] It is assignable from `Goal`
-    - [ ] It has the expected `UserId`
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
 
-
-```cs
 public class GoalControllerTests
 {
     private readonly FakeCollections collections;
@@ -17,10 +11,8 @@ public class GoalControllerTests
         collections = new();
     }
 
-    // ...
-
     [Fact]
-    public async void GetForUser()
+    public async Task GetGoalsForUser()
     {
         // Arrange
         var goals = collections.GetGoals();
@@ -32,19 +24,22 @@ public class GoalControllerTests
         // Act
         var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
         controller.ControllerContext.HttpContext = httpContext;
-        var result = await controller.GetForUser(goals[0].UserId!);
+        var result = await controller.GetGoalsForUser(goals[0].UserId!);
 
         // Assert
         Assert.NotNull(result);
 
+        var userGoals = result as IEnumerable<Goal>; // Cast the result to an IEnumerable<Goal>
+        Assert.NotNull(userGoals); // Ensure the cast is valid
+
         var index = 0;
-        foreach (Goal goal in result!)
+        foreach (Goal goal in userGoals)
         {
+            // Check that each goal is assignable from Goal
             Assert.IsAssignableFrom<Goal>(goal);
+            // Assert that the UserId matches the expected UserId
             Assert.Equal(goals[0].UserId, goal.UserId);
             index++;
         }
     }
 }
-
-```
